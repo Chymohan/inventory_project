@@ -65,3 +65,48 @@ class Inventory(models.Model):
     class Meta:
         unique_together = ('product', 'warehouse')
 
+# Purchase Order
+class PurchaseOrder(models.Model):
+    STATUS_CHOICES = (
+        ('DRAFT', 'Draft'),
+        ('SENT', 'Sent'),
+        ('RECEIVED', 'Received'),
+    )
+
+    po_number = models.CharField(max_length=100, unique=True)
+    supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES)
+    order_date = models.DateField()
+    expected_date = models.DateField(null=True, blank=True)
+    total_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+
+
+class PurchaseOrderItem(models.Model):
+    purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity_ordered = models.IntegerField()
+    quantity_received = models.IntegerField(default=0)
+    unit_cost = models.DecimalField(max_digits=10, decimal_places=2)
+
+# Sale Order
+class SaleOrder(models.Model):
+    STATUS_CHOICES = (
+        ('PENDING', 'Pending'),
+        ('SHIPPED', 'Shipped'),
+        ('DELIVERED', 'Delivered'),
+    )
+
+    order_number = models.CharField(max_length=100, unique=True)
+    customer_name = models.CharField(max_length=255)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES)
+    order_date = models.DateField()
+    total_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+
+
+class SaleOrderItem(models.Model):
+    sale_order = models.ForeignKey(SaleOrder, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.IntegerField()
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2)
