@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Supplier, Category, Product, Warehouse, Inventory
+from .models import PurchaseOrder, SaleOrder, Supplier, Category, Product, Warehouse, Inventory
 
 class SupplierSerializer(serializers.ModelSerializer):
     class Meta:
@@ -28,4 +28,14 @@ class WarehouseSerializer(serializers.ModelSerializer):
 class InventorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Inventory
+        fields = '__all__'
+
+class PurchaseOrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PurchaseOrder
+        fields = '__all__'
+
+class SaleOrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SaleOrder
         fields = '__all__'
