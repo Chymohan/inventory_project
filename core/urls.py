@@ -7,5 +7,6 @@ router.register(r'categories', CategoryViewSet)
 router.register(r'products', ProductViewSet)
 router.register(r'warehouses', WarehouseViewSet)
 router.register(r'inventory', InventoryViewSet)
+router.register(r'stock-movements', StockMovementViewSet)
 
 urlpatterns = router.urls
