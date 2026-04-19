@@ -1,4 +1,4 @@
-from .models import Inventory, Warehouse, StockMovement
+from core.models import Inventory, Warehouse, StockMovement
 
 def update_inventory(product, warehouse_id, qty_change, reference=""):
     warehouse = Warehouse.objects.get(id=warehouse_id)
