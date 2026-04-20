@@ -1,7 +1,7 @@
 from rest_framework import viewsets
 from core.models import Warehouse, Inventory, StockMovement
 from .serializers import WarehouseSerializer, InventorySerializer, StockMovementSerializer
-
+from core.permissions import IsManager
 
 class WarehouseViewSet(viewsets.ModelViewSet):
     queryset = Warehouse.objects.all()
@@ -11,6 +11,7 @@ class WarehouseViewSet(viewsets.ModelViewSet):
 class InventoryViewSet(viewsets.ModelViewSet):
     queryset = Inventory.objects.all()
     serializer_class = InventorySerializer
+    permission_classes = [IsManager]
 
 
 class StockMovementViewSet(viewsets.ReadOnlyModelViewSet):

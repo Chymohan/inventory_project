@@ -1,6 +1,7 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from core.models import Product, Inventory, StockMovement
+from core.permissions import IsManager
 
 
 @api_view(['GET'])
@@ -32,6 +33,7 @@ def movement_history(request):
 
 
 @api_view(['GET'])
+@permission_classes([IsManager])
 def low_stock(request):
     data = []
 

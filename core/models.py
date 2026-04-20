@@ -1,3 +1,5 @@
+from email.mime import image
+
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
@@ -37,6 +39,7 @@ class Category(models.Model):
 class Product(models.Model):
     sku = models.CharField(max_length=100, unique=True)
     name = models.CharField(max_length=255)
+    image = models.ImageField(upload_to='product_images/', null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
     supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True)
