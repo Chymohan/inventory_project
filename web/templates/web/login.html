@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>STOCKR — Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#07070e;--surface:#0d0d1a;--border:#1e1e35;
+      --text:#e2e0ff;--muted:#4a4870;--accent:#7c6af7;--red:#ff5c7a;
+    }
+    body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;}
+    .glow{position:fixed;top:0;left:50%;transform:translateX(-50%);width:800px;height:400px;background:radial-gradient(ellipse,#7c6af718 0%,transparent 70%);pointer-events:none;}
+    .card{width:380px;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:48px;box-shadow:0 32px 80px #00000090;position:relative;}
+    .logo{text-align:center;margin-bottom:36px;}
+    .logo-icon{font-size:44px;color:var(--accent);display:block;margin-bottom:10px;}
+    .logo h1{font-size:32px;font-weight:800;letter-spacing:.2em;}
+    .logo p{color:var(--muted);font-family:'Space Mono',monospace;font-size:10px;margin-top:6px;letter-spacing:.12em;}
+    .form{display:flex;flex-direction:column;gap:14px;}
+    label{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;display:block;}
+    input{font-family:'Space Mono',monospace;background:#0a0a12;border:1px solid var(--border);color:var(--text);border-radius:7px;padding:11px 14px;font-size:13px;width:100%;outline:none;transition:border-color .2s;}
+    input:focus{border-color:var(--accent);}
+    .btn{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:13px;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;letter-spacing:.1em;cursor:pointer;transition:opacity .2s,transform .1s;width:100%;margin-top:6px;}
+    .btn:hover{opacity:.9;}
+    .btn:active{transform:scale(.98);}
+    .btn:disabled{opacity:.5;cursor:wait;}
+    .error{color:var(--red);font-family:'Space Mono',monospace;font-size:11px;padding:8px 12px;background:#ff5c7a12;border:1px solid #ff5c7a33;border-radius:6px;display:none;}
+    .error.show{display:block;}
+    @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+    .shake{animation:shake .3s ease;}
+  </style>
+</head>
+<body>
+  <div class="glow"></div>
+  <div class="card" id="card">
+    <div class="logo">
+      <span class="logo-icon">▦</span>
+      <h1>STOCKR</h1>
+      <p>INVENTORY MANAGEMENT SYSTEM</p>
+    </div>
+    <div class="form">
+      <div>
+        <label>USERNAME</label>
+        <input type="text" id="username" placeholder="your username" autocomplete="username"/>
+      </div>
+      <div>
+        <label>PASSWORD</label>
+        <input type="password" id="password" placeholder="••••••••" autocomplete="current-password"/>
+      </div>
+      <div class="error" id="error"></div>
+      <button class="btn" id="loginBtn" onclick="doLogin()">SIGN IN →</button>
+    </div>
+  </div>
+
+  <script>
+    // If already logged in, redirect
+    if (localStorage.getItem('access_token')) window.location.href = '/';
+
+    document.getElementById('password').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doLogin();
+    });
+    document.getElementById('username').addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('password').focus();
+    });
+
+    function getCookie(name) {
+      const v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+      return v ? v[2] : null;
+    }
+
+    async function doLogin() {
+      const btn = document.getElementById('loginBtn');
+      const errEl = document.getElementById('error');
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+
+      if (!username || !password) {
+        showError('Please enter username and password');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'SIGNING IN…';
+      errEl.classList.remove('show');
+
+      try {
+        const res = await fetch('/api/auth/login/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+        if (data.access) {
+          localStorage.setItem('access_token', data.access);
+          localStorage.setItem('refresh_token', data.refresh || '');
+          localStorage.setItem('role', data.role || '');
+          localStorage.setItem('user', data.username || username);
+          window.location.href = '/';
+        } else {
+          showError(data.detail || (data.non_field_errors && data.non_field_errors[0]) || 'Invalid credentials');
+        }
+      } catch(e) {
+        showError('Could not reach server. Is Django running?');
+      }
+
+      btn.disabled = false;
+      btn.textContent = 'SIGN IN →';
+    }
+
+    function showError(msg) {
+      const el = document.getElementById('error');
+      el.textContent = '✗ ' + msg;
+      el.classList.add('show');
+      document.getElementById('card').classList.add('shake');
+      setTimeout(() => document.getElementById('card').classList.remove('shake'), 400);
+    }
+  </script>
+</body>
+</html>
