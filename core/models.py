@@ -4,15 +4,17 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 class User(AbstractUser):
-    groups = models.ManyToManyField(
-        "auth.Group",
-        related_name="core_user_set",  # <-- rename reverse relation
-        blank=True,
+    
+    ROLE_CHOICES = (
+        ('admin', 'Admin'),
+        ('manager', 'Manager'),
+        ('staff', 'Staff'),
     )
-    user_permissions = models.ManyToManyField(
-        "auth.Permission",
-        related_name="core_user_permissions_set",  # <-- rename reverse relation
-        blank=True,
+
+    role = models.CharField(
+        max_length=20,
+        choices=ROLE_CHOICES,
+        default='staff'
     )
 
     ROLE_CHOICES = (
