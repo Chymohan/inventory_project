@@ -1,5 +1,5 @@
 """
-URL configuration for inventory_project project.
+URL configuration for inventorymanagementsystem project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/6.0/topics/http/urls/
@@ -24,4 +24,5 @@ urlpatterns = [
     path('api/', include('orders.urls')),
     path('api/', include('inventory_app.urls')),
     path('api/', include('reports.urls')),
+    path('', include('web.urls')),
 ]
