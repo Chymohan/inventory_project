@@ -22,7 +22,7 @@ class PurchaseOrderViewSet(viewsets.ModelViewSet):
                 product=item.product,
                 warehouse_id=warehouse_id,
                 qty_change=remaining,
-                reference=f"PO-{po.id}"
+                reference=f"PO-{po.po_number}"
             )
 
             item.quantity_received = item.quantity_ordered
@@ -48,7 +48,7 @@ class SaleOrderViewSet(viewsets.ModelViewSet):
                 product=item.product,
                 warehouse_id=warehouse_id,
                 qty_change=-item.quantity,
-                reference=f"SO-{so.id}"
+                reference=f"SO-{so.order_number}"
             )
 
         so.status = 'DELIVERED'
