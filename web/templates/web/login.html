@@ -7,29 +7,48 @@
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet"/>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    :root{
-      --bg:#07070e;--surface:#0d0d1a;--border:#1e1e35;
-      --text:#e2e0ff;--muted:#4a4870;--accent:#7c6af7;--red:#ff5c7a;
-    }
+    :root{--bg:#07070e;--surface:#0d0d1a;--border:#1e1e35;--border2:#2a2a45;--text:#e2e0ff;--muted:#4a4870;--muted2:#5c5a88;--accent:#7c6af7;--accent-l:#a99fff;--red:#ff5c7a;--green:#1fd4a0;}
     body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;}
     .glow{position:fixed;top:0;left:50%;transform:translateX(-50%);width:800px;height:400px;background:radial-gradient(ellipse,#7c6af718 0%,transparent 70%);pointer-events:none;}
-    .card{width:380px;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:48px;box-shadow:0 32px 80px #00000090;position:relative;}
+    /* Card */
+    .card{width:400px;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:48px;box-shadow:0 32px 80px #00000090;position:relative;transition:opacity .3s;}
     .logo{text-align:center;margin-bottom:36px;}
     .logo-icon{font-size:44px;color:var(--accent);display:block;margin-bottom:10px;}
     .logo h1{font-size:32px;font-weight:800;letter-spacing:.2em;}
     .logo p{color:var(--muted);font-family:'Space Mono',monospace;font-size:10px;margin-top:6px;letter-spacing:.12em;}
+    /* Tab switcher */
+
+    /* Form fields */
     .form{display:flex;flex-direction:column;gap:14px;}
-    label{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;display:block;}
-    input{font-family:'Space Mono',monospace;background:#0a0a12;border:1px solid var(--border);color:var(--text);border-radius:7px;padding:11px 14px;font-size:13px;width:100%;outline:none;transition:border-color .2s;}
+    .field{display:flex;flex-direction:column;gap:5px;}
+    label{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:.1em;}
+    .input-wrap{position:relative;}
+    input[type=text],input[type=password]{font-family:'Space Mono',monospace;background:#0a0a12;border:1px solid var(--border);color:var(--text);border-radius:7px;padding:11px 42px 11px 14px;font-size:13px;width:100%;outline:none;transition:border-color .2s;}
     input:focus{border-color:var(--accent);}
+    /* Password toggle */
+    .pwd-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted2);font-size:16px;padding:2px;line-height:1;transition:color .2s;user-select:none;}
+    .pwd-toggle:hover{color:var(--accent-l);}
+    /* Buttons */
     .btn{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:13px;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;letter-spacing:.1em;cursor:pointer;transition:opacity .2s,transform .1s;width:100%;margin-top:6px;}
-    .btn:hover{opacity:.9;}
-    .btn:active{transform:scale(.98);}
-    .btn:disabled{opacity:.5;cursor:wait;}
-    .error{color:var(--red);font-family:'Space Mono',monospace;font-size:11px;padding:8px 12px;background:#ff5c7a12;border:1px solid #ff5c7a33;border-radius:6px;display:none;}
-    .error.show{display:block;}
+    .btn:hover{opacity:.9;}.btn:active{transform:scale(.98);}.btn:disabled{opacity:.5;cursor:wait;}
+    /* Error / success */
+    .msg{font-family:'Space Mono',monospace;font-size:11px;padding:10px 14px;border-radius:6px;display:none;line-height:1.5;}
+    .msg.err{color:var(--red);background:#ff5c7a12;border:1px solid #ff5c7a33;}
+    .msg.ok{color:var(--green);background:#1fd4a012;border:1px solid #1fd4a033;}
+    .msg.show{display:block;}
+    /* Token box */
+    .token-box{background:#0a0a12;border:1px solid var(--accent);border-radius:8px;padding:14px;margin-top:4px;display:none;}
+    .token-box.show{display:block;}
+    .token-label{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted2);letter-spacing:.1em;margin-bottom:8px;}
+    .token-val{font-family:'Space Mono',monospace;font-size:12px;color:var(--accent-l);word-break:break-all;line-height:1.6;}
+    .token-hint{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted2);margin-top:8px;line-height:1.5;}
+    .copy-btn{background:var(--accent);color:#fff;border:none;border-radius:5px;padding:4px 10px;font-family:'Space Mono',monospace;font-size:10px;cursor:pointer;margin-top:8px;transition:opacity .2s;}
+    .copy-btn:hover{opacity:.8;}
+    /* Shake */
     @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
     .shake{animation:shake .3s ease;}
+    /* Sections */
+    .section{display:none;}.section.on{display:block;}
   </style>
 </head>
 <body>
@@ -40,51 +59,154 @@
       <h1>STOCKR</h1>
       <p>INVENTORY MANAGEMENT SYSTEM</p>
     </div>
-    <div class="form">
-      <div>
-        <label>USERNAME</label>
-        <input type="text" id="username" placeholder="your username" autocomplete="username"/>
+
+    <!-- ── LOGIN SECTION ───────────────────────── -->
+    <div class="section on" id="sec-login">
+      <div class="form">
+        <div class="field">
+          <label>USERNAME</label>
+          <input type="text" id="username" placeholder="your username" autocomplete="username"/>
+        </div>
+        <div class="field">
+          <label>PASSWORD</label>
+          <div class="input-wrap">
+            <input type="password" id="password" placeholder="••••••••" autocomplete="current-password"/>
+            <button class="pwd-toggle" onclick="togglePwd('password','eye-login')" title="Show/hide password">
+              <span id="eye-login">👁</span>
+            </button>
+          </div>
+        </div>
+        <div style="text-align:right;margin-top:-4px">
+          <button onclick="showForgot()" style="background:none;border:none;color:var(--muted2);font-family:'Space Mono',monospace;font-size:11px;cursor:pointer;padding:0;transition:color .2s" onmouseover="this.style.color='var(--accent-l)'" onmouseout="this.style.color='var(--muted2)'">Forgot password?</button>
+        </div>
+        <div class="msg err" id="login-err"></div>
+        <button class="btn" id="loginBtn" onclick="doLogin()">SIGN IN →</button>
       </div>
-      <div>
-        <label>PASSWORD</label>
-        <input type="password" id="password" placeholder="••••••••" autocomplete="current-password"/>
-      </div>
-      <div class="error" id="error"></div>
-      <button class="btn" id="loginBtn" onclick="doLogin()">SIGN IN →</button>
     </div>
+
+    <!-- ── FORGOT PASSWORD SECTION ────────────────── -->
+    <div id="sec-forgot" style="display:none;margin-top:24px;border-top:1px solid var(--border);padding-top:24px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+        <span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--muted2);letter-spacing:.1em">RESET PASSWORD</span>
+        <button onclick="hideForgot()" style="background:none;border:none;color:var(--muted2);font-size:18px;cursor:pointer;line-height:1;padding:0" title="Back to login">×</button>
+      </div>
+
+      <!-- Step 1: Enter username → get token -->
+      <div id="step1">
+        <div class="form">
+          <div class="field">
+            <label>YOUR USERNAME</label>
+            <input type="text" id="fp-username" placeholder="Enter your username"/>
+          </div>
+          <div class="msg err" id="fp-err"></div>
+          <div class="msg ok" id="fp-ok"></div>
+          <!-- Token display box (shown after success) -->
+          <div class="token-box" id="token-box">
+            <div class="token-label">⚠ YOUR RESET TOKEN — COPY THIS NOW</div>
+            <div class="token-val" id="token-val"></div>
+            <div class="token-hint">This token expires in 60 minutes.<br>Paste it below to set your new password.</div>
+            <button class="copy-btn" onclick="copyToken()">⎘ Copy Token</button>
+          </div>
+          <button class="btn" id="fpBtn" onclick="doForgot()">GENERATE RESET TOKEN →</button>
+        </div>
+      </div>
+
+      <!-- Step 2: Enter token + new password → reset -->
+      <div id="step2" style="display:none">
+        <div class="form">
+          <div class="field">
+            <label>RESET TOKEN</label>
+            <input type="text" id="rp-token" placeholder="Paste your reset token here"/>
+          </div>
+          <div class="field">
+            <label>NEW PASSWORD</label>
+            <div class="input-wrap">
+              <input type="password" id="rp-pwd" placeholder="Min 6 characters"/>
+              <button class="pwd-toggle" onclick="togglePwd('rp-pwd','eye-rp')" title="Show/hide password">
+                <span id="eye-rp">👁</span>
+              </button>
+            </div>
+          </div>
+          <div class="field">
+            <label>CONFIRM NEW PASSWORD</label>
+            <div class="input-wrap">
+              <input type="password" id="rp-pwd2" placeholder="Repeat password"/>
+              <button class="pwd-toggle" onclick="togglePwd('rp-pwd2','eye-rp2')" title="Show/hide password">
+                <span id="eye-rp2">👁</span>
+              </button>
+            </div>
+          </div>
+          <div class="msg err" id="rp-err"></div>
+          <div class="msg ok" id="rp-ok"></div>
+          <button class="btn" id="rpBtn" onclick="doReset()">SET NEW PASSWORD →</button>
+          <button class="btn" style="background:transparent;color:var(--muted2);border:1px solid var(--border2);margin-top:4px" onclick="showStep(1)">← Back</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <script>
-    // If already logged in, redirect
     if (localStorage.getItem('access_token')) window.location.href = '/';
 
-    document.getElementById('password').addEventListener('keydown', e => {
-      if (e.key === 'Enter') doLogin();
-    });
-    document.getElementById('username').addEventListener('keydown', e => {
-      if (e.key === 'Enter') document.getElementById('password').focus();
-    });
+    // ── Forgot password toggle ────────────────────────────────────────────────
+    function showForgot() {
+      document.getElementById('sec-forgot').style.display = 'block';
+      document.getElementById('sec-login').style.display = 'none';
+      showStep(1);
+    }
+    function hideForgot() {
+      document.getElementById('sec-forgot').style.display = 'none';
+      document.getElementById('sec-login').style.display = 'block';
+    }
 
+    function showStep(n) {
+      document.getElementById('step1').style.display = n === 1 ? 'block' : 'none';
+      document.getElementById('step2').style.display = n === 2 ? 'block' : 'none';
+    }
+
+    // ── Password toggle ────────────────────────────────────────────────────────
+    const eyeState = {};
+    function togglePwd(inputId, eyeId) {
+      const input = document.getElementById(inputId);
+      const eye   = document.getElementById(eyeId);
+      eyeState[inputId] = !eyeState[inputId];
+      input.type = eyeState[inputId] ? 'text' : 'password';
+      eye.textContent = eyeState[inputId] ? '🙈' : '👁';
+    }
+
+    // ── Helpers ────────────────────────────────────────────────────────────────
     function getCookie(name) {
       const v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
       return v ? v[2] : null;
     }
 
+    function showMsg(id, msg, type) {
+      const el = document.getElementById(id);
+      el.textContent = (type === 'err' ? '✗ ' : '✓ ') + msg;
+      el.className = 'msg ' + type + ' show';
+    }
+
+    function hideMsg(id) {
+      document.getElementById(id).className = 'msg';
+    }
+
+    function shake() {
+      document.getElementById('card').classList.add('shake');
+      setTimeout(() => document.getElementById('card').classList.remove('shake'), 400);
+    }
+
+    // ── Login ──────────────────────────────────────────────────────────────────
+    document.getElementById('password').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+    document.getElementById('username').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('password').focus(); });
+
     async function doLogin() {
       const btn = document.getElementById('loginBtn');
-      const errEl = document.getElementById('error');
       const username = document.getElementById('username').value.trim();
       const password = document.getElementById('password').value;
-
-      if (!username || !password) {
-        showError('Please enter username and password');
-        return;
-      }
-
-      btn.disabled = true;
-      btn.textContent = 'SIGNING IN…';
-      errEl.classList.remove('show');
-
+      hideMsg('login-err');
+      if (!username || !password) { showMsg('login-err','Please enter username and password','err'); shake(); return; }
+      btn.disabled = true; btn.textContent = 'SIGNING IN…';
       try {
         const res = await fetch('/api/auth/login/', {
           method: 'POST',
@@ -99,22 +221,93 @@
           localStorage.setItem('user', data.username || username);
           window.location.href = '/';
         } else {
-          showError(data.detail || (data.non_field_errors && data.non_field_errors[0]) || 'Invalid credentials');
+          showMsg('login-err', data.detail || (data.non_field_errors && data.non_field_errors[0]) || 'Invalid credentials', 'err');
+          shake();
         }
       } catch(e) {
-        showError('Could not reach server. Is Django running?');
+        showMsg('login-err', 'Could not reach server. Is Django running?', 'err');
+        shake();
       }
-
-      btn.disabled = false;
-      btn.textContent = 'SIGN IN →';
+      btn.disabled = false; btn.textContent = 'SIGN IN →';
     }
 
-    function showError(msg) {
-      const el = document.getElementById('error');
-      el.textContent = '✗ ' + msg;
-      el.classList.add('show');
-      document.getElementById('card').classList.add('shake');
-      setTimeout(() => document.getElementById('card').classList.remove('shake'), 400);
+    // ── Forgot password — Step 1: get token ────────────────────────────────────
+    let _token = '';
+    async function doForgot() {
+      const btn = document.getElementById('fpBtn');
+      const username = document.getElementById('fp-username').value.trim();
+      hideMsg('fp-err'); hideMsg('fp-ok');
+      document.getElementById('token-box').classList.remove('show');
+      if (!username) { showMsg('fp-err', 'Please enter your username', 'err'); shake(); return; }
+      btn.disabled = true; btn.textContent = 'GENERATING…';
+      try {
+        const res = await fetch('/api/auth/forgot-password/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+          body: JSON.stringify({ username })
+        });
+        const data = await res.json();
+        if (data.token) {
+          _token = data.token;
+          document.getElementById('token-val').textContent = data.token;
+          document.getElementById('token-box').classList.add('show');
+          showMsg('fp-ok', 'Token generated! Copy it, then click "Use Token" below.', 'ok');
+          btn.textContent = 'USE TOKEN →';
+          btn.onclick = () => {
+            document.getElementById('rp-token').value = _token;
+            showStep(2);
+          };
+        } else {
+          showMsg('fp-ok', data.detail || 'If that username exists, a reset token has been generated.', 'ok');
+          btn.textContent = 'GENERATE RESET TOKEN →';
+          btn.onclick = doForgot;
+        }
+      } catch(e) {
+        showMsg('fp-err', 'Server error. Try again.', 'err'); shake();
+        btn.textContent = 'GENERATE RESET TOKEN →';
+        btn.onclick = doForgot;
+      }
+      btn.disabled = false;
+    }
+
+    function copyToken() {
+      navigator.clipboard.writeText(_token).then(() => {
+        const b = document.querySelector('.copy-btn');
+        b.textContent = '✓ Copied!';
+        setTimeout(() => b.textContent = '⎘ Copy Token', 2000);
+      });
+    }
+
+    // ── Forgot password — Step 2: reset ────────────────────────────────────────
+    async function doReset() {
+      const btn = document.getElementById('rpBtn');
+      const token = document.getElementById('rp-token').value.trim();
+      const pwd   = document.getElementById('rp-pwd').value;
+      const pwd2  = document.getElementById('rp-pwd2').value;
+      hideMsg('rp-err'); hideMsg('rp-ok');
+      if (!token) { showMsg('rp-err', 'Please enter your reset token', 'err'); shake(); return; }
+      if (!pwd || pwd.length < 6) { showMsg('rp-err', 'Password must be at least 6 characters', 'err'); shake(); return; }
+      if (pwd !== pwd2) { showMsg('rp-err', 'Passwords do not match', 'err'); shake(); return; }
+      btn.disabled = true; btn.textContent = 'RESETTING…';
+      try {
+        const res = await fetch('/api/auth/reset-password/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+          body: JSON.stringify({ token, password: pwd })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          showMsg('rp-ok', data.detail + ' Redirecting to login…', 'ok');
+          btn.style.display = 'none';
+          setTimeout(() => { hideForgot(); showStep(1); btn.style.display=''; btn.textContent='SET NEW PASSWORD →'; }, 2500);
+        } else {
+          showMsg('rp-err', data.detail || 'Reset failed. Check your token.', 'err'); shake();
+          btn.disabled = false; btn.textContent = 'SET NEW PASSWORD →';
+        }
+      } catch(e) {
+        showMsg('rp-err', 'Server error. Try again.', 'err'); shake();
+        btn.disabled = false; btn.textContent = 'SET NEW PASSWORD →';
+      }
     }
   </script>
 </body>

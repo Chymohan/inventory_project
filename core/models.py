@@ -1,5 +1,4 @@
 from email.mime import image
-
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
@@ -16,13 +15,6 @@ class User(AbstractUser):
         choices=ROLE_CHOICES,
         default='staff'
     )
-
-    ROLE_CHOICES = (
-        ('admin', 'Admin'),
-        ('manager', 'Manager'),
-        ('staff', 'Staff'),
-    )
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES)
 
 class Supplier(models.Model):
     name = models.CharField(max_length=255)
@@ -128,3 +120,16 @@ class StockMovement(models.Model):
     quantity = models.IntegerField()
     reference = models.CharField(max_length=100, null=True, blank=True)
     moved_at = models.DateTimeField(auto_now_add=True)
+
+import uuid
+from django.utils import timezone
+
+class PasswordResetToken(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    token = models.UUIDField(default=uuid.uuid4, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    used = models.BooleanField(default=False)
+
+    def is_valid(self):
+        # Token expires after 1 hour
+        return not self.used and (timezone.now() - self.created_at).seconds < 3600
